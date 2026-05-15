@@ -1,0 +1,43 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences.dart';
+import 'package:northbank/services/auth_service.dart';
+
+void main() {
+  late AuthService authService;
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    authService = AuthService();
+  });
+
+  group('AuthService', () {
+    test('deve iniciar não autenticado', () {
+      expect(authService.isAuthenticated, false);
+      expect(authService.userId, null);
+    });
+
+    test('login deve alterar estado de autenticação', () async {
+      await authService.login('12345678900');
+      
+      expect(authService.isAuthenticated, true);
+      expect(authService.userId, '12345678900');
+    });
+
+    test('logout deve limpar autenticação', () async {
+      await authService.login('12345678900');
+      await authService.logout();
+      
+      expect(authService.isAuthenticated, false);
+      expect(authService.userId, null);
+    });
+
+    test('init deve restaurar estado de autenticação', () async {
+      await authService.login('12345678900');
+      final newAuthService = AuthService();
+      await newAuthService.init();
+      
+      expect(newAuthService.isAuthenticated, true);
+      expect(newAuthService.userId, '12345678900');
+    });
+  });
+}
